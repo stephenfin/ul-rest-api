@@ -1,1 +1,2 @@
 v0.1.0, 14/07/2013 -- Initial release
+v0.2.0, 05/08/2013 -- Implemented first versions of webscrapers and other datasources

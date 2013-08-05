@@ -32,7 +32,7 @@ class RestHandler(webapp2.RequestHandler):
 		service_id = self.request.get('service')
 
 		if not service_id:
-			self.error('Please include the service parameter')
+			self.error(404)
 			return
 
 		services = {

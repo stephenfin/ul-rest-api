@@ -25,8 +25,6 @@ class BaseHandler(webapp2.RequestHandler):
     """
     Generates a suitable json response to present to the end user
 
-    @param data_type: The type of data we're returning
-    @type data_type: String
     @param data: The actual data
     @param data: List
     """
@@ -89,44 +87,14 @@ class SchedulingHandler(BaseHandler):
       return
 
     result = {
-      '/api/v1/timetable' : self.get_timetable,
-      '/api/v1/exam_timetable' : self.get_exam_timetable,
-      '/api/v1/calendar' : self.get_calendar,
-    }.get(self.request.path, self.generate_error_response)(query)
+      '/api/v1/timetable' : scheduling.semester_timetable,
+      '/api/v1/calendar' : scheduling.calendar,
+    }.get(self.request.path)(query)
 
-    self.generate_response(result)
-
-  '''
-  Retrieve the timetable for a given ID and return the result 
-  '''
-  def get_timetable(self, query):
-    # Retrieve a timeable for a given ID number (query)
-    data = scheduling.semester_timetable(query)
-    
-    if not data:
-      return -1
-
-    return data
-
-  def get_exam_timetable(self, query):
-    self.response.write("Error")
-
-  def get_calendar(self, query):
-    # Retrieve a calendar for a given year (query)
-    data = scheduling.calendar(query)
-    
-    if not data:
-      return -1
-
-    result = collections.OrderedDict()
-    result['id'] = query
-    result['date_created'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    result['data'] = data
-
-    return result
-
-  def error(self, query):
-    self.response.write("Error")
+    if not result:
+      self.generate_error_response("An Error Occurred")
+      
+    self.generate_response(result)    
 
 '''
 Handles the following services:
@@ -134,11 +102,25 @@ Handles the following services:
     building            List all buildings on campus or parse a building code
     room                Parse a room code
 '''
-class GeolocationHandler(webapp2.RequestHandler):
+class GeolocationHandler(BaseHandler):
   """ Geolocation Services """
   def get(self):
-    #Parse the URI
-    self.response.write("Geolocation") 
+    #Parse the parameters from the URL
+    query = self.request.get('q')
+
+    if not query:
+      self.generate_error_response('Please include the parameter \'q\'')
+      return
+
+    result = {
+      '/api/v1/building' : geolocation.building,
+      '/api/v1/room' : geolocation.room,
+    }.get(self.request.path)(query)
+
+    if not result:
+      self.generate_error_response("An Error Occurred")
+      
+    self.generate_response(result)  
 
 '''
 Handles the following services:
@@ -146,19 +128,48 @@ Handles the following services:
     course              Provides a brief overview of a course
     module              Provides a brief overview of a module
 '''
-class CourseHandler(webapp2.RequestHandler):
+class CourseHandler(BaseHandler):
   """ Course Services """
   def get(self):
-    #Parse the URI
-    self.response.write("Course") 
+    #Parse the parameters from the URL
+    query = self.request.get('q')
+
+    if not query:
+      self.generate_error_response('Please include the parameter \'q\'')
+      return
+
+    result = {
+      '/api/v1/course' : course.course,
+      '/api/v1/module' : course.module,
+    }.get(self.request.path)(query)
+
+    if not result:
+      self.generate_error_response("An Error Occurred")
+      
+    self.generate_response(result)
 
 '''
 Handles the following services:
   Staff:
     staff               Provides a brief overview of a staff member
 '''
-class StaffHandler(webapp2.RequestHandler):
+class StaffHandler(BaseHandler):
   """ Staff Services """
   def get(self):
-    #Parse the URI
-    self.response.write("Staff") 
+    #Parse the parameters from the URL
+    query = self.request.get('q')
+
+    if not query:
+      self.generate_error_response('Please include the parameter \'q\'')
+      return
+
+    query = query.split(',')
+
+    result = {
+      '/api/v1/staff' : staff.staff,
+    }.get(self.request.path)(query[0], query[1])
+
+    if not result:
+      self.generate_error_response("An Error Occurred")
+      
+    self.generate_response(result)  

@@ -111,8 +111,8 @@ def room(room_code):
     room_number = room_code[2:]
     data = OrderedDict([
       ('room_code', room_code),
-      ('building_name', building_code),
-      ('building_code', building_name),
+      ('building_name', building_name),
+      ('building_code', building_code),
       ('floor', floor_code),
       ('room', room_number),
     ])

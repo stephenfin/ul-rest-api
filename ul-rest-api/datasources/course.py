@@ -42,23 +42,28 @@ def course(course_code):
   course_re = re.match(common.COURSE_NAME_RE, text_value)
   course_data = course_re.group('code', 'name')
 
-  # Parse course URL from href attribute
-  course_data = course_data + ('http://www3.ul.ie/courses/' + link_value,) 
+  course_url = 'http://www3.ul.ie/courses/' + link_value
+
+  data = [
+    ('code', course_data[0]),
+    ('name', course_data[1]),
+    ('url', course_url),
+  ]
   
-  return course_data
+  return data
 
 def module(module_code):
   """
   Retrieve and parses module information from UL site
 
   >>> module("CE4702")
-  ('CE4702', u'Computer Software 2')
+  [('code', 'CE4702'), ('name', u'Computer Software 2')]
 
   @param module_code: Module code to get details for
   @type module_code: String
 
-  @return A tuple containing the original module code and title of module, or 
-  -1 if match not found
+  @return A list containing tuples for the module code and name, or -1 if 
+  match not found
   """
   url = 'http://193.1.101.55/tt_moduledetails_res.asp'
   
@@ -74,7 +79,12 @@ def module(module_code):
   if not rows:
     return -1
   
-  return (module_code, common.tidy_tag(rows[1].xpath('td[2]')[0]))
+  data = [
+    ('code', module_code),
+    ('name', common.tidy_tag(rows[1].xpath('td[2]')[0])),
+  ]
+  
+  return data
 
 if __name__ == '__main__':
   print(module('CE4702'))

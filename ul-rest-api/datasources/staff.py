@@ -8,6 +8,7 @@
 """ staff.py: Datasources for staff services """
 
 from __future__ import print_function
+from collections import OrderedDict
 
 import common
 import lxml.html
@@ -16,17 +17,13 @@ def staff(first_name, last_name):
   '''
   Search UL Staff Directory for a given name (first and last)
 
-  >>staff("John", "Nelson")
-  [('name', 'John Nelson'), ('dept', 'Electronic & Computer Engineering'),
-   ('room', 'ER2-017'), ('tel', '+353 61 20 2358')]
-
   @param first_name: The first name of staff member to search for
   @type first_name: String
   @param last_name: The last name of staff member to search for
   @type last_name: String
 
-  @return A list containing tuples for name, department, office and phone, or
-  -1 if match not found
+  @return An OrderedDict containing the name, department, office and phone of 
+  given person, or -1 if match not found.
   '''
   # Retrieve page and create parser object for table
   url = 'http://www.ul.ie/staff-search'
@@ -49,18 +46,21 @@ def staff(first_name, last_name):
   # multiple matches  
   for idx, row in enumerate(rows):
     # match on last name also
-    result = _parse_entry(row, last_name)
+    result = _parse_staff_entry(row, last_name)
     if result:
       return result
 
   return -1
 
-def _parse_entry(row, last_name):
+def _parse_staff_entry(row, last_name):
   '''
   Parses a single staff entry
 
   @param row: The given staff member's lxml HtmlElement row
   @type row: lxml.html.HtmlElement
+
+  @return An OrderedDict containing the name, department, office and phone of 
+  given person if last name matches, or null if match not found.
   '''
   name = row.xpath('span[@class=\'name\']/text()')[0]
 
@@ -77,12 +77,12 @@ def _parse_entry(row, last_name):
   if tel:
     tel = tel[0]
 
-  data = [
+  data = OrderedDict([
     ('name', name),
     ('dept', dept),
     ('room', room),
     ('tel', tel),
-  ]
+  ])
 
   return data
 

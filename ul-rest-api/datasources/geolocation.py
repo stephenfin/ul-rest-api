@@ -8,6 +8,7 @@
 """ geolocation.py: Datasources for the geolocation services """
 
 from __future__ import print_function
+from collections import OrderedDict
 
 import common
 import re
@@ -17,24 +18,14 @@ def building(building_name):
   """
   Retrieve and parses building information from UL site
 
-  >>> building("Schuman")
-  [('name', 'Schuman Building '), ('thumb', 'https://www2.ul.ie/pp/graphics\
-    /schumanbldg_small_41.jpg'), ('url', 'https://www2.ul.ie/web/WWW/Services\
-    /Buildings_and_Estates/At_A_Glance/Pictures?did=692879761&pageUrl=/WWW/\
-    Services/Buildings+and+Estates/At+A+Glance/Pictures')]
-
   @param module_code: Buidling name to get details for
   @type module_code: String
 
-  @return A list containing tuples for the building name, a thumbnail and web 
+  @return An OrderedDict containing the building name, a thumbnail and web 
   address of building information page, or -1 if match not found
   """
   url = 'https://www2.ul.ie/web/WWW/Services/Buildings_and_Estates/At_A_Glance/'
   
-  '''
-  row = common.get_page(url).xpath('//div[@class=\'rc-doc\']/table/tbody[1]\
-    //strong[contains(., \'{0}\')]'.format(building_name.title()))
-  '''
   row = common.get_page(url).xpath('//div[@class=\'rc-doc\']/table/tbody[1]/tr\
     [contains(.//strong, \'{0}\')]'.format(building_name.title()))
 
@@ -46,11 +37,11 @@ def building(building_name):
   building_image = 'https://www2.ul.ie' + row[0].xpath('./td[2]/a/img/@src')[0]
   building_link = 'https://www2.ul.ie' + row[0].xpath('./td[2]/a/@href')[0]
 
-  data = [
+  data = OrderedDict([
     ('name', building_data),
     ('thumb', building_image),
     ('url', building_link),
-  ]
+  ])
   
   return data
 
@@ -58,14 +49,10 @@ def room(room_code):
   """
   Parses a room code using lookups of hardcoded dictionaries
 
-  >>> room("C2-061")
-  [('room_code', 'C2061'), ('building_name', 'C'), ('building_code', \
-    'Main Building'), ('floor', '2'), ('room', '061')]
-
   @param room_code: Room code to get details for
   @type room_code: String
 
-  @return A list containing tuples for the room code, building name, building 
+  @return An OrderedDict containing the room code, building name, building 
   code, floor and room number, or -1 if match not found
   """
 
@@ -107,13 +94,13 @@ def room(room_code):
     building_name = two_char_token_map[building_code]
     floor_code = room_code[2]
     room_number = room_code[3:]
-    data = [
+    data = OrderedDict([
       ('room_code', room_code),
       ('building_name', building_code),
       ('building_code', building_name),
       ('floor', floor_code),
       ('room', room_number),
-    ]
+    ])
     return data
 
   # One digit building code
@@ -122,13 +109,13 @@ def room(room_code):
     building_name = one_char_token_map[building_code]
     floor_code = room_code[1]
     room_number = room_code[2:]
-    data = [
+    data = OrderedDict([
       ('room_code', room_code),
       ('building_name', building_code),
       ('building_code', building_name),
       ('floor', floor_code),
       ('room', room_number),
-    ]
+    ])
     return data
 
   # Match not found

@@ -8,6 +8,7 @@
 """ course.py: Datasources for the course services """
 
 from __future__ import print_function
+from collections import OrderedDict
 
 import common
 import re
@@ -17,15 +18,11 @@ def course(course_code):
   """
   Retrieve and parses course information from UL site
 
-  >>> course("LM118")
-  ('LM069', ' Computer Engineering', 
-    'http://www3.ul.ie/courses/ComputerEngineering.shtml')
-
   @param module_code: Course code to get details for
   @type module_code: String
 
-  @return A tuple containing the original course code, title of course and web 
-  address of course page, or -1 if match not found
+  @return An OrderedDict containing the original course code, title of course 
+  and web address of course page, or -1 if match not found
   """
   url = 'http://www3.ul.ie/courses/AlphabeticalList.shtml'
   
@@ -44,11 +41,11 @@ def course(course_code):
 
   course_url = 'http://www3.ul.ie/courses/' + link_value
 
-  data = [
+  data = OrderedDict([
     ('code', course_data[0]),
     ('name', course_data[1]),
     ('url', course_url),
-  ]
+  ])
   
   return data
 
@@ -62,8 +59,8 @@ def module(module_code):
   @param module_code: Module code to get details for
   @type module_code: String
 
-  @return A list containing tuples for the module code and name, or -1 if 
-  match not found
+  @return An OrderedDict containing the module code and name, or -1 if match 
+  not found
   """
   url = 'http://193.1.101.55/tt_moduledetails_res.asp'
   
@@ -71,18 +68,16 @@ def module(module_code):
     'T1' : module_code
   }
 
-  # Get first match based on child. Solution from:
-  # http://stackoverflow.com/questions/9683054/xpath-to-select-element-based-on-childs-child-value
   rows = common.get_page(url, params).xpath('//table//table/tr')
 
   # no matches
   if not rows:
     return -1
   
-  data = [
+  data = OrderedDict([
     ('code', module_code),
     ('name', common.tidy_tag(rows[1].xpath('td[2]')[0])),
-  ]
+  ])
   
   return data
 

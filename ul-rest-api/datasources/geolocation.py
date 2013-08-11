@@ -38,6 +38,7 @@ def building(building_name):
   building_link = 'https://www2.ul.ie' + row[0].xpath('./td[2]/a/@href')[0]
 
   data = OrderedDict([
+    ('kind', 'building'),
     ('name', building_data),
     ('thumb', building_image),
     ('url', building_link),
@@ -94,32 +95,25 @@ def room(room_code):
     building_name = two_char_token_map[building_code]
     floor_code = room_code[2]
     room_number = room_code[3:]
-    data = OrderedDict([
-      ('room_code', room_code),
-      ('building_name', building_code),
-      ('building_code', building_name),
-      ('floor', floor_code),
-      ('room', room_number),
-    ])
-    return data
-
   # One digit building code
-  if (room_code[0] in one_char_token_map):
+  elif (room_code[0] in one_char_token_map):
     building_code = room_code[0]
     building_name = one_char_token_map[building_code]
     floor_code = room_code[1]
     room_number = room_code[2:]
-    data = OrderedDict([
-      ('room_code', room_code),
-      ('building_name', building_name),
-      ('building_code', building_code),
-      ('floor', floor_code),
-      ('room', room_number),
-    ])
-    return data
+  # No match found
+  else:
+    return -1
 
-  # Match not found
-  return -1
+  data = OrderedDict([
+    ('kind', 'room'),
+    ('room_code', room_code),
+    ('building_name', building_code),
+    ('building_code', building_name),
+    ('floor', floor_code),
+    ('room', room_number),
+  ])
+  return data
 
 if __name__ == '__main__':
   print(building('Schuman'))

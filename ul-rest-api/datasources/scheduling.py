@@ -32,7 +32,7 @@ def semester_timetable(student_id):
 
   rows = common.get_page(url, params).xpath('//div/table/tr[2]/td')
 
-  result = []
+  results = []
 
   for idx, day in enumerate(rows):
     periods = []
@@ -48,9 +48,13 @@ def semester_timetable(student_id):
       if not data:
         continue
     
-      periods.append((idx2, _parse_timetable_entry(data)))
-    result.append((idx, OrderedDict(periods)))
-  return OrderedDict(result)
+      periods.append(_parse_timetable_entry(data))
+    results.append((idx, periods))
+
+  results = OrderedDict([('kind', 'timetable#day'), 
+    ('items', OrderedDict(results))])
+  
+  return OrderedDict(results)
 
 def _parse_timetable_entry(data):
   '''
@@ -79,6 +83,7 @@ def _parse_timetable_entry(data):
   weeks = weeks_re.group('p1_start', 'p1_end', 'p2_start', 'p2_end')
 
   data = OrderedDict([
+    ('kind', 'timetable#entry'),
     ('start_time', start_time),
     ('end_time', end_time),
     ('module', module),
@@ -133,11 +138,14 @@ def calendar(year):
     ])
     results.append((result_names[idx], result))
 
-  return OrderedDict(results)
+  results = OrderedDict([('kind', 'calendar'), 
+    ('items', OrderedDict(results))])
 
-if __name__ == "__main__":
-  print(semester_timetable("09005891"))
-  print(semester_timetable("09005081"))
+  return results
+
+if __name__ == '__main__':
+  print(semester_timetable('09005891'))
+  print(semester_timetable('09005081'))
   print(calendar(2014))
   print(calendar(2013))
   print(calendar(2012))

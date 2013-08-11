@@ -8,8 +8,9 @@
 """ handlers.py: Handlers for all URIs in application """
 
 from collections import OrderedDict
-import webapp2
 import json
+import urllib, urllib2
+import webapp2
 
 import datasources.common as common
 import datasources.course as course
@@ -21,6 +22,35 @@ from datetime import datetime
 
 class BaseHandler(webapp2.RequestHandler):
   """ Base Handler """
+  def validate_parameters(self, additional_params):
+    """
+    Validates that the <q> and <key> parameters, along with any other required 
+    params, are included in the request.
+
+    @param params: A list of required params other than <q> and <key>
+    @type params: List of Strings
+
+    @return True if validation succesful, else False
+    """
+    #TODO: validate key
+
+    missing_params = []
+
+    params = ['q'] + additional_params
+    for param in params:
+      if not self.request.get(param):
+        error = OrderedDict()
+        error['error'] = 'missingParam'
+        error['details'] = param
+        missing_params.append(error)
+
+    if missing_params:
+      #Generate an error response
+      self.generate_error_response('Missing parameters', missing_params)
+      return False
+
+    return True
+
   def generate_response(self, data):
     """
     Generates a suitable json response to present to the end user
@@ -31,9 +61,9 @@ class BaseHandler(webapp2.RequestHandler):
     rfc3339_ts = datetime.utcnow().isoformat("T") + "Z"
 
     response_data = OrderedDict([
-      ("api_version", common.API_VERSION),
-      ("data_created", rfc3339_ts),
-      ("data", data),
+      ('api_version', common.API_VERSION),
+      ('data_created', rfc3339_ts),
+      ('data', data),
     ])
 
     response = OrderedDict()
@@ -42,18 +72,22 @@ class BaseHandler(webapp2.RequestHandler):
     self.response.headers['Content-Type'] = 'application/json' 
     self.response.write(json.dumps(response))
 
-  def generate_error_response(self, error_message=None):
+  def generate_error_response(self, error_message, errors=None):
     """
     Generates a suitable json error response to present to the end user
 
     @param error_message: The error message to show to the end user
     @type data_type: String
     """
-    if not error_message:
-      error_message = 'Invalid parameter \'q\''
+    if not errors:
+      error = OrderedDict()
+      error['error'] = 'generalError'
+      error['details'] = error_message
+      errors = [error]
 
     error_data = OrderedDict([
-      ("message", error_message),
+      ('message', error_message),
+      ('errors', errors)
     ])
 
     error = OrderedDict()
@@ -79,22 +113,28 @@ Handles the following services:
 class SchedulingHandler(BaseHandler):
   """ Scheduling Services """
   def get(self):
+    if not self.validate_parameters([]):
+      return    #Quit, since parameters are invalid
+
     #Parse the parameters from the URL
     query = self.request.get('q')
 
-    if not query:
-      self.generate_error_response('Please include the parameter \'q\'')
-      return
+    try:
+      result = {
+        '/api/v1/timetable' : scheduling.semester_timetable,
+        '/api/v1/calendar' : scheduling.calendar,
+      }.get(self.request.path)(query)
 
-    result = {
-      '/api/v1/timetable' : scheduling.semester_timetable,
-      '/api/v1/calendar' : scheduling.calendar,
-    }.get(self.request.path)(query)
+      if not result:
+        self.generate_error_response('An Error Occurred')
 
-    if not result:
-      self.generate_error_response("An Error Occurred")
-      
-    self.generate_response(result)    
+      self.generate_response(result)
+    except urllib2.URLError as ex:
+      self.generate_error_response('An Error Occured Contacting the Site')
+    except IOError as ex:
+      self.generate_error_response('An Error Occured Contacting the Site')
+    except Exception as ex:
+      self.generate_error_response('An Unknown Error Occured')
 
 '''
 Handles the following services:
@@ -105,12 +145,11 @@ Handles the following services:
 class GeolocationHandler(BaseHandler):
   """ Geolocation Services """
   def get(self):
+    if not self.validate_parameters([]):
+      return    #Quit, since parameters are invalid
+
     #Parse the parameters from the URL
     query = self.request.get('q')
-
-    if not query:
-      self.generate_error_response('Please include the parameter \'q\'')
-      return
 
     result = {
       '/api/v1/building' : geolocation.building,
@@ -118,7 +157,7 @@ class GeolocationHandler(BaseHandler):
     }.get(self.request.path)(query)
 
     if not result:
-      self.generate_error_response("An Error Occurred")
+      self.generate_error_response('An Error Occurred')
       
     self.generate_response(result)  
 
@@ -131,12 +170,11 @@ Handles the following services:
 class CourseHandler(BaseHandler):
   """ Course Services """
   def get(self):
+    if not self.validate_parameters([]):
+      return    #Quit, since parameters are invalid
+
     #Parse the parameters from the URL
     query = self.request.get('q')
-
-    if not query:
-      self.generate_error_response('Please include the parameter \'q\'')
-      return
 
     result = {
       '/api/v1/course' : course.course,
@@ -144,7 +182,7 @@ class CourseHandler(BaseHandler):
     }.get(self.request.path)(query)
 
     if not result:
-      self.generate_error_response("An Error Occurred")
+      self.generate_error_response('An Error Occurred')
       
     self.generate_response(result)
 
@@ -156,12 +194,11 @@ Handles the following services:
 class StaffHandler(BaseHandler):
   """ Staff Services """
   def get(self):
+    if not self.validate_parameters([]):
+      return    #Quit, since parameters are invalid
+
     #Parse the parameters from the URL
     query = self.request.get('q')
-
-    if not query:
-      self.generate_error_response('Please include the parameter \'q\'')
-      return
 
     #Since name (query) should have been received in format "<first>,<last>", 
     #we need to split it into two strings
@@ -172,6 +209,6 @@ class StaffHandler(BaseHandler):
     }.get(self.request.path)(query[0], query[1])
 
     if not result:
-      self.generate_error_response("An Error Occurred")
+      self.generate_error_response('An Error Occurred')
       
     self.generate_response(result)  

@@ -19,6 +19,8 @@ import urllib, urllib2
 Constants
 '''
 
+API_VERSION = "1.0"
+
 ''' Regexs '''
 # All regexs generated using the gSkinner RegExr online tool: 
 #   http://gskinner.com/RegExr/

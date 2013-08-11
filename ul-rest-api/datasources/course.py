@@ -42,6 +42,7 @@ def course(course_code):
   course_url = 'http://www3.ul.ie/courses/' + link_value
 
   data = OrderedDict([
+    ('kind', 'course'),
     ('code', course_data[0]),
     ('name', course_data[1]),
     ('url', course_url),
@@ -72,6 +73,7 @@ def module(module_code):
     return -1
   
   data = OrderedDict([
+    ('kind', 'module'),
     ('code', module_code),
     ('name', common.tidy_tag(rows[1].xpath('td[2]')[0])),
   ])

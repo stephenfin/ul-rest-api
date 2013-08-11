@@ -14,7 +14,7 @@ import common
 import lxml.html
 
 def staff(first_name, last_name):
-  '''
+  """
   Search UL Staff Directory for a given name (first and last)
 
   @param first_name: The first name of staff member to search for
@@ -24,7 +24,7 @@ def staff(first_name, last_name):
 
   @return An OrderedDict containing the name, department, office and phone of 
   given person, or -1 if match not found.
-  '''
+  """
   # Retrieve page and create parser object for table
   url = 'http://www.ul.ie/staff-search'
 
@@ -53,7 +53,7 @@ def staff(first_name, last_name):
   return -1
 
 def _parse_staff_entry(row, last_name):
-  '''
+  """
   Parses a single staff entry
 
   @param row: The given staff member's lxml HtmlElement row
@@ -61,7 +61,7 @@ def _parse_staff_entry(row, last_name):
 
   @return An OrderedDict containing the name, department, office and phone of 
   given person if last name matches, or null if match not found.
-  '''
+  """
   name = row.xpath('span[@class=\'name\']/text()')[0]
 
   if not name.split()[1].lower() == last_name.lower():
@@ -86,7 +86,7 @@ def _parse_staff_entry(row, last_name):
 
   return data
 
-if __name__ == "__main__":
-  print(staff(first_name = "John", last_name = "Nelson"))
-  print(staff(first_name = "Natalia", last_name = "Kopteva"))
-  print(staff(first_name = "Ciaran", last_name = "MacNamee"))
+if __name__ == '__main__':
+  print(staff(first_name = 'John', last_name = 'Nelson'))
+  print(staff(first_name = 'Natalia', last_name = 'Kopteva'))
+  print(staff(first_name = 'Ciaran', last_name = 'MacNamee'))

@@ -5,6 +5,8 @@
 
 # Author: Stephen Finucane <stephenfinucane@hotmail.com>
 
+""" common.py: Collection of common functions and constants for datasources """
+
 from __future__ import print_function
 from collections import OrderedDict
 
@@ -16,8 +18,6 @@ import urllib, urllib2
 '''
 Constants
 '''
-
-API_VERSION = '1.0'
 
 ''' Regexs '''
 # All regexs generated using the gSkinner RegExr online tool: 
@@ -56,26 +56,6 @@ def get_page(url, params=None):
   document = lxml.html.parse(response)
 
   return document
-
-def generate_response(data_type, data):
-  """
-  Generates a suitable json response to present to the end user
-
-  @param data_type: The type of data we're returning
-  @type data_type: String
-  @param data: The actual data
-  @param data: List
-  """
-
-  rfc3339_ts = datetime.datetime.utcnow().isoformat("T") + "Z"
-
-  response = OrderedDict([
-    ("api_version", API_VERSION),
-    ("data_created", rfc3339_ts),
-    ("data", OrderedDict(data)),
-  ])
-
-  return json.dumps(response)
 
 def tidy_tag(tag):
   """

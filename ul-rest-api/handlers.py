@@ -163,6 +163,8 @@ class StaffHandler(BaseHandler):
       self.generate_error_response('Please include the parameter \'q\'')
       return
 
+    #Since name (query) should have been received in format "<first>,<last>", 
+    #we need to split it into two strings
     query = query.split(',')
 
     result = {

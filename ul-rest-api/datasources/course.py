@@ -53,9 +53,6 @@ def module(module_code):
   """
   Retrieve and parses module information from UL site
 
-  >>> module("CE4702")
-  [('code', 'CE4702'), ('name', u'Computer Software 2')]
-
   @param module_code: Module code to get details for
   @type module_code: String
 

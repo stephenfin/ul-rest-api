@@ -5,14 +5,21 @@
 
 # Author: Stephen Finucane <stephenfinucane@hotmail.com>
 
-from __future__ import print_function
+""" common.py: Collection of common functions and constants for datasources """
 
+from __future__ import print_function
+from collections import OrderedDict
+
+import datetime
 import lxml.html
+import json
 import urllib, urllib2
 
 '''
 Constants
 '''
+
+API_VERSION = "1.0"
 
 ''' Regexs '''
 # All regexs generated using the gSkinner RegExr online tool: 
@@ -27,9 +34,6 @@ Definitions
 def get_page(url, params=None):
   """
   Retrieves page and creates lxml object
-
-  Uses urlfetch as defined here:
-    https://developers.google.com/appengine/docs/python/urlfetch/overview
 
   @param url: The URL of page to retrieve
   @type url: String
@@ -47,14 +51,6 @@ def get_page(url, params=None):
 
   request.add_header('User-Agent', 
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:24.0) Gecko/20100101 Firefox/24.0')
-
-  '''
-  #Google method
-  reponse - urlfetch.fetch(url = url,
-    payload = form_data,
-    method = urlfetch.POST,
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'})
-  '''
 
   response = urllib2.urlopen(request)
 

@@ -100,7 +100,7 @@ def calendar(year):
   @param year: Start year of calendar to retrieve ([year] - [year + 1])
   @type year: String
 
-  @return A An OrderedDict containing events for calendar, plus corresponding 
+  @return An OrderedDict containing events for calendar, plus corresponding 
   dates, or -1 if match not found
   """
   # Retrieve page and create parser object for table

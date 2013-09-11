@@ -5,13 +5,13 @@
 
 # Author: Stephen Finucane <stephenfinucane@hotmail.com>
 
-""" library.py: Datasources for the library services """
-
 from __future__ import print_function
 from collections import OrderedDict
 
 import requests
 import lxml.html
+
+base_url = 'https://capitadiscovery.co.uk/ul/'
 
 def login(student_id):
   """
@@ -168,7 +168,32 @@ def history(student_id):
 
   url = 'https://capitadiscovery.co.uk/ul/account/history'
 
-  pass
+  session = login(student_id)
+
+  if session is None:
+    return
+
+  doc = session.get(url)
+  doc = lxml.html.document_fromstring(doc.content)
+  doc = doc.xpath('//table[@id=\'history\']/tbody/tr')
+
+  if doc is None:
+    return
+
+  loans = []
+
+  for row in doc:
+    loan = OrderedDict([
+      ('title', row.xpath('th[1]/text()')[0]),
+      ('thumb', base_url + row.xpath('th[1]/a/img/@src')[0]),
+      ('link', base_url + row.xpath('th[1]/a/@href')[0]),
+      ('borrowed', row.xpath('td[1]/text()')[0]),
+      ('returned', row.xpath('td[2]/text()')[0]),
+    ])
+    loans.append(loan)
+
+  return loans
 
 if __name__ == '__main__':
   print(charges('09005891'))
+  print(history('09005891'))

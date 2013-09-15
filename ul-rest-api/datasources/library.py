@@ -88,8 +88,28 @@ def loans(student_id):
     return
 
   doc = session.get(url)
+  doc = lxml.html.document_fromstring(doc.content)
+  doc = doc.xpath('//table[@id=\'loans\']/tbody/tr')
 
-  return doc
+  if doc is None:
+    return
+
+  loans = []
+
+  for row in doc:
+    loan = OrderedDict([
+      ('title', ' '.join(row.xpath('th[1]')[0].text_content().split())),
+      ('author', ' '.join(row.xpath('th[1]/span')[0].text_content().split())),
+      ('id', row.xpath('td[4]/form/input[1]/@value')[0].strip()),
+      ('thumb', base_url + row.xpath('th[1]/a/img/@src')[0].strip()),
+      ('link', base_url + row.xpath('th[1]/a/@href')[0].strip()),
+      ('due_date', row.xpath('td[1]/text()')[0].strip()),
+      ('fine', row.xpath('td[2]/text()')[1].strip()),
+      ('renew_count', row.xpath('td[3]/text()')[0].strip()),
+    ])
+    loans.append(loan)
+
+  return loans
 
 def charges(student_id):
   """
@@ -119,10 +139,10 @@ def charges(student_id):
 
   for row in doc:
     loan = OrderedDict([
-      ('date', row.xpath('td[1]/text()')[0]),
-      ('type', row.xpath('td[2]/text()')[0]),
-      ('amount', row.xpath('td[3]/text()')[0]),
-      ('details', row.xpath('td[4]/text()')[0]),
+      ('date', row.xpath('td[1]/text()')[0].strip()),
+      ('type', row.xpath('td[2]/text()')[0].strip()),
+      ('amount', row.xpath('td[3]/text()')[0].strip()),
+      ('details', row.xpath('td[4]/text()')[0].strip()),
     ])
     loans.append(loan)
 
@@ -175,25 +195,40 @@ def history(student_id):
 
   doc = session.get(url)
   doc = lxml.html.document_fromstring(doc.content)
-  doc = doc.xpath('//table[@id=\'history\']/tbody/tr')
 
-  if doc is None:
-    return
+  # Handle multiple pages. Where more than a single page exists, the 
+  # pagingControl element contains said number of pages plus a 'next' button.
+  # Hence we subtract 1 for this and 1 for the first page (already fetched) = 2
+  page_count = len(doc.xpath('//ul[@class=\'pagingControl\']/li')) - 2
 
   loans = []
 
-  for row in doc:
-    loan = OrderedDict([
-      ('title', row.xpath('th[1]/text()')[0]),
-      ('thumb', base_url + row.xpath('th[1]/a/img/@src')[0]),
-      ('link', base_url + row.xpath('th[1]/a/@href')[0]),
-      ('borrowed', row.xpath('td[1]/text()')[0]),
-      ('returned', row.xpath('td[2]/text()')[0]),
-    ])
-    loans.append(loan)
+  for i in range(1, page_count):
+    # prevent redownloading first page
+    if (i > 1):
+      offset = (page_count - 1) * 10
+      doc = session.get(url + '?offset=' + str(offset))
+      doc = lxml.html.document_fromstring(doc.content)
+    
+    doc = doc.xpath('//table[@id=\'history\']/tbody/tr')
+
+    if doc is None:
+      return
+
+    for row in doc:
+      loan = OrderedDict([
+        ('title', row.xpath('th[1]/a')[0].text_content().strip()),
+        ('author', row.xpath('th[1]/span')[0].text_content().strip()),
+        ('thumb', base_url + row.xpath('th[1]/a/img/@src')[0].strip()),
+        ('link', base_url + row.xpath('th[1]/a/@href')[0].strip()),
+        ('borrowed', row.xpath('td[1]/text()')[0].strip()),
+        ('returned', row.xpath('td[2]/text()')[0].strip()),
+      ])
+      loans.append(loan)
 
   return loans
 
 if __name__ == '__main__':
-  print(charges('09005891'))
-  print(history('09005891'))
+  print(charges('12144177'))
+  print(history('12144177'))
+  print(loans('12144177'))

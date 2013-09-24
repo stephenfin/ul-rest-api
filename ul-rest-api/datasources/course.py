@@ -26,7 +26,7 @@ def course(course_code):
   """
   url = 'http://www3.ul.ie/courses/AlphabeticalList.shtml'
   
-  row = common.get_page(url).xpath('//p//a[contains(., \'{0}\')]'.format(course_code))
+  row = common.get_page(url).xpath('//p//a[contains(., \'{0}\')]'.format(course_code.upper()))
 
   # Handle course does not exist (either now or ever)
   if not row:

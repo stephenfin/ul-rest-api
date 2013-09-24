@@ -174,7 +174,7 @@ class CourseHandler(BaseHandler):
     query = self.request.get('q')
 
     result = {
-      '/api/v1/course' : course.course,
+      '/api/v1/course' : Course.get_course_dict,
       '/api/v1/module' : Module.get_module_dict,
     }.get(self.request.path)(query)
 

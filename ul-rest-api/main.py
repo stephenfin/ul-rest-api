@@ -9,7 +9,13 @@
 
 import handlers
 import webapp2
+import sys
 from webapp2_extras import routes
+
+# inject './lib' dir in the path so that we can simply do 'import ndb'
+# or whatever there's in the app lib dir
+if 'lib' not in sys.path:
+  sys.path[0:0] = ['lib']
 
 app = webapp2.WSGIApplication([
     routes.PathPrefixRoute('/api/v1', [
@@ -32,4 +38,6 @@ app = webapp2.WSGIApplication([
       webapp2.Route('/staff', handlers.StaffHandler, 
         name='staff'),
     ]),
+    webapp2.Route('/module', handlers.CourseModelHandler,
+      name='module_model'),
 ], debug=True)

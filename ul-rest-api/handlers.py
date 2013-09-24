@@ -18,6 +18,8 @@ import datasources.geolocation as geolocation
 import datasources.scheduling as scheduling
 import datasources.staff as staff
 
+from models.course import Module
+
 from datetime import datetime
 
 class BaseHandler(webapp2.RequestHandler):
@@ -211,4 +213,18 @@ class StaffHandler(BaseHandler):
     if not result:
       self.generate_error_response('An Error Occurred')
       
-    self.generate_response(result)  
+    self.generate_response(result)
+
+class CourseModelHandler(BaseHandler):
+  def get(self):
+    if not self.validate_parameters([]):
+      return
+
+    #Parse the parameters from the URL
+    query = self.request.get('q')
+
+    result = Module.get_module('CE4701')
+
+    self.response.write('The output is:\n')
+    self.response.write(result)
+    self.response.write('\nEOD')

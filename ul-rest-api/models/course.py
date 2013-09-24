@@ -5,13 +5,17 @@
 
 # Author: Stephen Finucane <stephenfinucane@hotmail.com>
 
-""" course.py: Datasources for the course services """
+""" course.py: Model for the course services """
 
+from __future__ import print_function
+from collections import OrderedDict
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
-import re
+from import_relative import import_relative
+import re, os
 
-from ..datasources.course import module
+common = import_relative('common', '..datasources')
+course = import_relative('course', '..datasources')
 
 class Course(ndb.Model):
   def validate_code(self, value):
@@ -41,14 +45,29 @@ class Module(ndb.Model):
     if module:
       return module
 
-    result = datasources.course(code)
+    result = course.module(code)
 
     if result == -1:
       return None
 
     module = Module(
-      code = result['code'],
+      code = result['code'].lower(),
       name = result['name'])
     module.put()
 
     return module
+
+  @classmethod
+  def get_module_dict(cls, code):
+    module = cls.get_module(code)
+
+    if not module:
+      return -1
+
+    data = OrderedDict([
+      ('kind', 'module'),
+      ('code', module.code),
+      ('name', module.name),
+    ])
+
+    return data

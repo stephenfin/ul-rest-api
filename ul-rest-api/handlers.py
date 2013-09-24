@@ -8,19 +8,14 @@
 """ handlers.py: Handlers for all URIs in application """
 
 from collections import OrderedDict
+from datetime import datetime
 import json
 import urllib, urllib2
 import webapp2
+import sys
 
-import datasources.common as common
-import datasources.course as course
-import datasources.geolocation as geolocation
-import datasources.scheduling as scheduling
-import datasources.staff as staff
-
-from models.course import Module
-
-from datetime import datetime
+from datasources import common, course, geolocation, scheduling, staff
+from models.course import Module, Course
 
 class BaseHandler(webapp2.RequestHandler):
   """ Base Handler """
@@ -180,7 +175,7 @@ class CourseHandler(BaseHandler):
 
     result = {
       '/api/v1/course' : course.course,
-      '/api/v1/module' : course.module,
+      '/api/v1/module' : Module.get_module_dict,
     }.get(self.request.path)(query)
 
     if not result:
@@ -214,17 +209,4 @@ class StaffHandler(BaseHandler):
       self.generate_error_response('An Error Occurred')
       
     self.generate_response(result)
-
-class CourseModelHandler(BaseHandler):
-  def get(self):
-    if not self.validate_parameters([]):
-      return
-
-    #Parse the parameters from the URL
-    query = self.request.get('q')
-
-    result = Module.get_module('CE4701')
-
-    self.response.write('The output is:\n')
-    self.response.write(result)
-    self.response.write('\nEOD')
+    

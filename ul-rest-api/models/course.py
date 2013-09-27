@@ -104,8 +104,8 @@ class Module(ndb.Model):
   @classmethod
   def get_module(cls, module_code):
     """
-    Gets a module object from datastore.
-    
+    Gets a module's object from datastore.
+
     Attempts to get a module from the datastore. If it is not found, attempt 
     to retrieve details of said module from UL website and add the module to 
     the database before returning this module.
@@ -135,8 +135,8 @@ class Module(ndb.Model):
   @classmethod
   def get_module_dict(cls, module_code):
     """
-    Gets a module details as an OrderedDict from datastore.
-    
+    Gets a module's details as an OrderedDict from datastore.
+
     Attempts to get a course from the datastore. If it is not found, attempt 
     to retrieve details of said course from UL website and add the course to 
     the database before returning this module

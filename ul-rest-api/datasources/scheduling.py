@@ -126,6 +126,7 @@ def calendar(year):
   ]
 
   results = []
+  results.append(('year', year))
 
   for idx, search_term in enumerate(search_terms):
     data = rows[0].xpath('./tr[./td/div/strong= \'{0}\']'.format(search_term))

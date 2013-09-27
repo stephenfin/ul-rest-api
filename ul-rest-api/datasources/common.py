@@ -10,6 +10,13 @@
 from __future__ import print_function
 from collections import OrderedDict
 
+# if running on google app engine
+try:
+  from google.appengine.api import urlfetch
+except ImportError:
+  pass
+
+import StringIO
 import datetime
 import lxml.html
 import json
@@ -41,18 +48,39 @@ def get_page(url, params=None):
   @type url: Dict
   """
 
-  # Handle POST requests
-  if (params):
-    form_data = urllib.urlencode(params)
-    request = urllib2.Request(url = url, data = form_data)
-  # Handle GET requests
+  try:
+    from google.appengine.api import urlfetch
+  
+  # if not running on google app engine
+  except ImportError:
+    # Handle POST requests
+    if (params):
+      form_data = urllib.urlencode(params)
+      request = urllib2.Request(url = url, data = form_data)
+    # Handle GET requests
+    else:
+      request = urllib2.Request(url = url)
+
+    response = urllib2.urlopen(request)
+
+  # if running on google app engine
   else:
-    request = urllib2.Request(url = url)
+    form_data = None
 
-  request.add_header('User-Agent', 
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:24.0) Gecko/20100101 Firefox/24.0')
+    # Handle POST requests
+    if (params):
+      form_data = urllib.urlencode(params)
+      method = urlfetch.POST
+    # Handle GET requests
+    else:
+      method = urlfetch.GET
 
-  response = urllib2.urlopen(request)
+    response = urlfetch.fetch(url=url,
+      payload=form_data,
+      method=method,
+      validate_certificate=False)
+
+    response = StringIO.StringIO(response.content)
 
   #Build lxml object from retieved page
   document = lxml.html.parse(response)

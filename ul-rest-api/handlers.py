@@ -16,6 +16,8 @@ import sys
 
 from datasources import common, course, geolocation, scheduling, staff
 from models.course import Module, Course
+from models.geolocation import Building
+from models.scheduling import Calendar
 
 class BaseHandler(webapp2.RequestHandler):
   """ Base Handler """
@@ -119,7 +121,7 @@ class SchedulingHandler(BaseHandler):
     try:
       result = {
         '/api/v1/timetable' : scheduling.semester_timetable,
-        '/api/v1/calendar' : scheduling.calendar,
+        '/api/v1/calendar' : Calendar.get_calendar_dict,
       }.get(self.request.path)(query)
 
       if not result:
@@ -149,7 +151,7 @@ class GeolocationHandler(BaseHandler):
     query = self.request.get('q')
 
     result = {
-      '/api/v1/building' : geolocation.building,
+      '/api/v1/building' : Building.get_building_dict,
       '/api/v1/room' : geolocation.room,
     }.get(self.request.path)(query)
 
